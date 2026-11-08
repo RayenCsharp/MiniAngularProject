@@ -1,1 +1,53 @@
-<p>login works!</p>
+<div class="min-h-[60vh] flex flex-col items-center justify-center py-8">
+  <div class="bg-white rounded-xl shadow-md p-8 w-full max-w-sm">
+
+    <header class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Admin login</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        This area is only for the shop administrator. Customers can browse without an account.
+      </p>
+    </header>
+
+    <form class="space-y-4">
+
+      <div class="space-y-1">
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="email"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+        />
+        @if(true){ <!--if the email is empty-->
+            <p class="text-sm text-red-600">Email is required</p>
+        }
+      </div>
+
+      <div class="space-y-1">
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+        />
+        @if(true){ <!--if the password is empty-->
+            <p class="text-sm text-red-600">Password is required</p>
+        }
+      </div>
+
+      @if(true){ <!--if login or password is wrong-->
+        <p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        Wrong email or password
+      </p>
+      }
+
+      <button
+        type="submit"
+        class="w-full bg-cyan-700 text-white py-2 rounded-lg transition-colors hover:bg-cyan-800 cursor-pointer"
+      >
+        Login
+      </button>
+    </form>
+  </div>
+</div>
