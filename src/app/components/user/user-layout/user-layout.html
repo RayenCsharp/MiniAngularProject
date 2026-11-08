@@ -1,2 +1,30 @@
-<p>user-layout works!</p>
-<router-outlet></router-outlet>
+<div class="bg-stone-50 min-h-screen">
+  <nav class="bg-cyan-700 text-white grid grid-cols-3 items-center p-5">
+    <h4 class="text-xl font-bold cursor-default justify-self-start">Souk El Khorda</h4>
+    <div class="flex gap-4 justify-self-center">
+      <a
+        class="hover:text-white/80"
+        routerLinkActive="font-bold border-b-2 border-white"
+        [routerLink]="['/articles']"
+      >
+        Articles
+      </a>
+      <a
+        class="hover:text-white/80"
+        routerLinkActive="font-bold border-b-2 border-white"
+        [routerLink]="['/about']"
+      >
+        About Us
+      </a>
+    </div>
+    <a
+      class="border border-white font-medium px-4 py-2 rounded transition-colors hover:bg-white hover:text-cyan-700 justify-self-end"
+      [routerLink]="['/login']"
+    >
+      Login
+    </a>
+  </nav>
+  <main class="max-w-6xl mx-auto px-4">
+    <router-outlet></router-outlet>
+  </main>
+</div>
