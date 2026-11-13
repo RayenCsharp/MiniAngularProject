@@ -11,5 +11,6 @@ export interface Article {
   negociable: boolean;
   disponible: boolean;
   datePublication: Date;
+  deadline: Date;
   offres: Offre[];
 }

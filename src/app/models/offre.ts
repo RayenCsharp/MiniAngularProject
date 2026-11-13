@@ -1,4 +1,5 @@
 export interface Offre {
+  id: string;
   nomAcheteur: string;
   emailAcheteur: string;
   telephoneAcheteur: string;
