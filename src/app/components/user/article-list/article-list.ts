@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, Signal } from '@angular/core';
 import { ArticleCard } from '../../shared/article-card/article-card';
 import { Article } from '../../../models/article';
-  
+import { ArticleServices } from '../../../services/article-services';
+
 @Component({
   imports: [ArticleCard],
   selector: 'app-article-list',
@@ -9,94 +10,6 @@ import { Article } from '../../../models/article';
   templateUrl: './article-list.html',
 })
 export class ArticleList {
-  articles: Article[] = [
-  {
-    id: '1',
-    nom: 'Vintage Leather Jacket',
-    photo: 'https://picsum.photos/seed/jacket/400/300',
-    prix: 85,
-    categorie: 'Clothing',
-    description: 'Brown leather jacket, size M. A few small scratches on the sleeves.',
-    etat: 'good',
-    negociable: true,
-    disponible: true,
-    datePublication: new Date('2026-10-12'),
-    offres: [
-      {
-        nomAcheteur: 'Test Buyer One',
-        emailAcheteur: 'buyer1@example.com',
-        telephoneAcheteur: '20000001',
-        montant: 70,
-        message: 'Can you do 70 TND?',
-        date: new Date('2026-10-14'),
-        status: 'waiting',
-      },
-    ],
-  },
-  {
-    id: '2',
-    nom: 'Samsung Galaxy A12',
-    photo: 'https://picsum.photos/seed/phone/400/300',
-    prix: 220,
-    categorie: 'Electronics',
-    description: '64 GB, cracked corner on the back, screen is perfect. Charger included.',
-    etat: 'used',
-    negociable: true,
-    disponible: true,
-    datePublication: new Date('2026-10-20'),
-    offres: [],
-  },
-  {
-    id: '3',
-    nom: 'Wooden Bookshelf',
-    photo: 'https://picsum.photos/seed/shelf/400/300',
-    prix: 120,
-    categorie: 'Furniture',
-    description: 'Five shelves, 180 cm tall. Solid wood, needs to be picked up in Tunis.',
-    etat: 'good',
-    negociable: false,
-    disponible: true,
-    datePublication: new Date('2026-10-25'),
-    offres: [],
-  },
-  {
-    id: '4',
-    nom: 'Harry Potter Box Set',
-    photo: 'https://picsum.photos/seed/books/400/300',
-    prix: 60,
-    categorie: 'Books',
-    description: 'Books 1 to 7, English edition. Pages slightly yellowed.',
-    etat: 'good',
-    negociable: true,
-    disponible: false,
-    datePublication: new Date('2026-09-30'),
-    offres: [],
-  },
-  {
-    id: '5',
-    nom: 'Photoshop Poster Templates',
-    photo: 'https://picsum.photos/seed/poster/400/300',
-    prix: 15,
-    categorie: 'Digital',
-    description: 'Pack of 20 editable poster templates (PSD). Sent by email after purchase.',
-    etat: 'new',
-    negociable: false,
-    disponible: true,
-    datePublication: new Date('2026-11-01'),
-    offres: [],
-  },
-  {
-    id: '6',
-    nom: 'Mountain Bike 26"',
-    photo: 'https://picsum.photos/seed/bike/400/300',
-    prix: 300,
-    categorie: 'Sports',
-    description: '21 speeds, new tires. The front brake needs adjusting.',
-    etat: 'used',
-    negociable: true,
-    disponible: true,
-    datePublication: new Date('2026-11-03'),
-    offres: [],
-  },
-];
+  private readonly articleServices = inject(ArticleServices);
+  articles: Signal<Article[]> = this.articleServices.articles;
 }
