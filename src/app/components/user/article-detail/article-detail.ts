@@ -5,9 +5,11 @@ import { Article } from '../../../models/article';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { Offre } from '../../../models/offre';
+import { CountdownPipe } from '../../../pipes/countdown-pipe';
+import { form, FormField, FormRoot, required, email, pattern, min } from '@angular/forms/signals';
 
 @Component({
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, CountdownPipe, FormField, FormRoot],
   selector: 'app-article-detail',
   styleUrl: './article-detail.css',
   templateUrl: './article-detail.html',
@@ -17,6 +19,8 @@ export class ArticleDetail implements OnInit {
   private readonly articleServices = inject(ArticleServices);
   article = signal<Article | undefined>(undefined);
   offers = signal<Offre[] | undefined>(undefined);
+  offerSuccess = signal(false);
+  sortBy = signal('mostRecent');
   private id: string | null = null;
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -30,26 +34,94 @@ export class ArticleDetail implements OnInit {
     }
   }
 
-  sortOffers(event: Event): void {
-    const sortBy = (event.target as HTMLSelectElement).value;
-    const originalOffers = this.article()?.offres ?? [];
+  readonly offreModel = signal<Offre>({
+    id: Math.random().toString(36).substring(2, 15),
+    nomAcheteur: '',
+    emailAcheteur: '',
+    telephoneAcheteur: '',
+    montant: 0,
+    message: '',
+    date: new Date(),
+    status: 'waiting',
+  });
 
-    const sortedOffers = [...originalOffers].sort((first, second) => {
-      if (sortBy === 'amount') {
-        return second.montant - first.montant;
-      }
-
-      if (sortBy === 'status') {
-        return first.status.localeCompare(second.status);
-      }
-
-      if (sortBy === 'mostRecent') {
-        return second.date.getTime() - first.date.getTime();
-      }
-
-      return 0;
+  readonly offreForm = form(this.offreModel, (path) => {
+    required(path.nomAcheteur, { message: 'Name is required' });
+    required(path.emailAcheteur, { message: 'Email is required' });
+    email(path.emailAcheteur, { message: 'Invalid email format' });
+    required(path.telephoneAcheteur, { message: 'Phone number is required' });
+    pattern(path.telephoneAcheteur, /^[0-9]{8}$/, { message: 'Phone number must be 8 digits' });
+    required(path.montant, { message: 'Amount is required' });
+    min(path.montant, () => (this.article()?.negociable ? 1 : (this.article()?.prix ?? 0) + 0.01), {
+      message: () =>
+        this.article()?.negociable
+          ? 'Amount must be at least 1 TND'
+          : `Amount must be greater than ${this.article()?.prix} TND`,
     });
+  });
 
-    this.offers.set(sortedOffers);
+  onSubmit() {
+    this.offerSuccess.set(false);
+
+    if (this.offreForm().invalid()) {
+      console.error('Form is invalid:', this.offreForm().errors);
+      return;
+    }
+    const articleId = this.article()?.id;
+    if (!articleId) {
+      console.error('Cannot add offer: article is not loaded');
+      return;
+    }
+
+    console.log('Form submitted:', this.offreModel());
+    const offre = { ...this.offreModel(), date: new Date() }; // Update the date to the current date when submitting
+    const added = this.articleServices.addOfferToArticle(articleId, offre);
+    if (!added) {
+      console.error(`Cannot add offer: article ${articleId} does not exist`);
+      return;
+    }
+
+    const updatedArticle = this.articleServices.getArticleById(articleId);
+    this.article.set(updatedArticle);
+    this.offers.set(updatedArticle?.offres ?? []);
+    this.sortOffers(this.sortBy());
+    this.resetForm();
+    this.offerSuccess.set(true);
+    setTimeout(() => {
+      this.offerSuccess.set(false);
+    }, 3000);
+    console.log('Offer added to article:', this.offers());
+  }
+
+  resetForm() {
+    this.offreForm().reset();
+    this.offreModel.set({
+      id: Math.random().toString(36).substring(2, 15),
+      nomAcheteur: '',
+      emailAcheteur: '',
+      telephoneAcheteur: '',
+      montant: 0,
+      message: '',
+      date: new Date(),
+      status: 'waiting',
+    });
+  }
+
+  sortOffers(sortBy: string) {
+    let sortOffers = [...(this.article()?.offres ?? [])];
+    this.sortBy.set(sortBy);
+
+    if (sortBy === 'mostRecent') {
+      sortOffers.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    } else if (sortBy === 'amount') {
+      sortOffers.sort((a, b) => b.montant - a.montant);
+    } else if (sortBy === 'status') {
+      sortOffers.sort((a, b) => {
+        const statusOrder = { waiting: 0, accepted: 1, refused: 2 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
+    }
+
+    this.offers.set(sortOffers);
   }
 }

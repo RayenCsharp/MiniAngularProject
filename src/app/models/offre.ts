@@ -4,7 +4,7 @@ export interface Offre {
   emailAcheteur: string;
   telephoneAcheteur: string;
   montant: number;
-  message?: string;
+  message: string;
   date: Date;
   status: 'waiting' | 'accepted' | 'refused';
 }

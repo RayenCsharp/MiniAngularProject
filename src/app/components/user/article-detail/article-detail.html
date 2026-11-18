@@ -3,50 +3,50 @@
     class="inline-flex w-fit items-center justify-center rounded-xl border-2 border-cyan-700 px-5 py-2.5 font-medium text-cyan-700 transition hover:bg-cyan-700 hover:text-white"
     [routerLink]="['/articles']"
   >
-    Retour
+    Back
   </a>
-  @if (article() != undefined) {
+  @if ( article(); as article) {
     <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div>
         <img
-          [src]="article()?.photo"
-          [alt]="article()?.nom"
+          [src]="article.photo"
+          [alt]="article.nom"
           class="w-full h-96 object-cover rounded-xl shadow-lg"
-          [class.grayscale]="!article()?.disponible"
+          [class.grayscale]="!article.disponible"
         />
       </div>
       <div class="space-y-4">
-        <h1 class="text-2xl font-bold">{{ article()?.nom }}</h1>
+        <h1 class="text-2xl font-bold">{{ article.nom }}</h1>
         <div class="flex flex-wrap items-center gap-3">
           <span
             class="inline-flex items-center rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold text-cyan-800"
           >
-            {{ article()?.categorie }}
+            {{ article.categorie }}
           </span>
           <span
             class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold capitalize shadow-sm"
             [class]="
-              article()?.etat === 'new'
+              article.etat === 'new'
                 ? 'bg-emerald-100 text-emerald-800'
-                : article()?.etat === 'good'
+                : article.etat === 'good'
                   ? 'bg-blue-100 text-blue-800'
                   : 'bg-amber-100 text-amber-800'
             "
           >
-            {{ article()?.etat }} condition
+            {{ article.etat }} condition
           </span>
         </div>
         <div class="rounded-2xl bg-orange-50 px-5 py-4 shadow-sm ring-1 ring-orange-100">
           <p class="text-sm font-semibold uppercase tracking-wide text-orange-700">Price</p>
           <h2 class="mt-1 text-3xl font-extrabold text-orange-600">
-            {{ article()?.prix }} <span class="text-lg font-semibold">TND</span>
+            {{ article.prix }} <span class="text-lg font-semibold">TND</span>
           </h2>
         </div>
         <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5">
           <h3 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
             Description
           </h3>
-          <p class="leading-relaxed text-gray-700">{{ article()?.description }}</p>
+          <p class="leading-relaxed text-gray-700">{{ article.description }}</p>
         </div>
         <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <li class="rounded-xl bg-gray-50 p-4 ring-1 ring-gray-100">
@@ -54,7 +54,7 @@
               >Published on</span
             >
             <span class="mt-1 block font-medium text-gray-800">{{
-              article()?.datePublication | date
+              article.datePublication | date
             }}</span>
           </li>
           <li class="rounded-xl bg-cyan-50 p-4 ring-1 ring-cyan-100">
@@ -62,16 +62,28 @@
               >Deadline</span
             >
             <span class="mt-1 block font-medium text-cyan-900">{{
-              article()?.deadline | date 
-            }}</span> <!-- I will add personalized pipe format here -->
+              article.deadline | countdown
+            }}</span>
           </li>
         </ul>
       </div>
     </section>
-    @if (article()?.disponible) {
+    @if (article.disponible) {
       <section class="px-4">
-        <form class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-lg">
+        <form
+          class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-lg"
+          (submit)="onSubmit()"
+          [formRoot]="offreForm"
+        >
           <h2 class="mb-4 text-lg font-semibold text-gray-800">Make an offer</h2>
+          @if (offerSuccess()) {
+            <p
+              class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700"
+              role="status"
+            >
+              Your offer was added successfully.
+            </p>
+          }
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="space-y-1">
               <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
@@ -79,24 +91,32 @@
                 id="name"
                 type="text"
                 autocomplete="name"
+                placeholder="Your name"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                [formField]="offreForm.nomAcheteur"
               />
-              @if (true) {
-                <!--if the name doesnt satisfy the validation criteria-->
-                <p class="text-sm text-red-600">name is not valid</p>
+              @if (offreForm.nomAcheteur().invalid() && offreForm.nomAcheteur().dirty()) {
+                @for (error of offreForm.nomAcheteur().errors(); track $index) {
+                  <p class="text-sm text-red-600">{{ error.message }}</p>
+                }
               }
             </div>
             <div class="space-y-1">
-              <label for="email" class="block text-sm font-medium text-gray-700">Phone</label>
+              <label for="Phone" class="block text-sm font-medium text-gray-700">Phone</label>
               <input
                 id="Phone"
                 type="tel"
                 autocomplete="tel"
+                placeholder="Your phone number"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                [formField]="offreForm.telephoneAcheteur"
               />
-              @if (true) {
-                <!--if the phone doesn't satisfy the validation criteria-->
-                <p class="text-sm text-red-600">Phone is not valid</p>
+              @if (
+                offreForm.telephoneAcheteur().invalid() && offreForm.telephoneAcheteur().dirty()
+              ) {
+                @for (error of offreForm.telephoneAcheteur().errors(); track $index) {
+                  <p class="text-sm text-red-600">{{ error.message }}</p>
+                }
               }
             </div>
             <div class="space-y-1">
@@ -105,49 +125,52 @@
                 id="email"
                 type="email"
                 autocomplete="email"
+                placeholder="Your email"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                [formField]="offreForm.emailAcheteur"
               />
-              @if (true) {
-                <!--if the email doesn't satisfy the validation criteria-->
-                <p class="text-sm text-red-600">Email is not valid</p>
+              @if (offreForm.emailAcheteur().invalid() && offreForm.emailAcheteur().dirty()) {
+                @for (error of offreForm.emailAcheteur().errors(); track $index) {
+                  <p class="text-sm text-red-600">{{ error.message }}</p>
+                }
               }
             </div>
             <div class="space-y-1">
-              <label for="email" class="block text-sm font-medium text-gray-700">Price</label>
+              <label for="Price" class="text-sm font-medium text-gray-700">Price</label>
+              @if (article.negociable) {
+                <span class="text-xs text-gray-500"> This article is negotiable.</span>
+              } @else {
+                <span class="text-xs text-red-500"> This article is not negotiable.</span>
+              }
               <input
                 id="Price"
                 type="number"
                 autocomplete="off"
+                placeholder="Your offer price"
                 class="w-full appearance-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                [formField]="offreForm.montant"
               />
-              @if (true) {
-                <!--if the price doesn't satisfy the validation criteria-->
-                <p class="text-sm text-red-600">Price is not valid</p>
+              @if (offreForm.montant().invalid() && offreForm.montant().dirty()) {
+                @for (error of offreForm.montant().errors(); track $index) {
+                  <p class="text-sm text-red-600">{{ error.message }}</p>
+                }
               }
             </div>
             <div class="space-y-1 sm:col-span-2">
-              <label for="email" class="block text-sm font-medium text-gray-700"
+              <label for="Message" class="block text-sm font-medium text-gray-700"
                 >Message <span class="text-xs text-gray-500">(optional)</span></label
               >
               <textarea
                 id="Message"
                 rows="4"
                 class="w-full resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+                [formField]="offreForm.message"
               ></textarea>
             </div>
-            @if (true) {
-              <!--if the price is not negotiable-->
-              <p
-                class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 sm:col-span-2"
-              >
-                Price is not negotiable, please enter a valid price either higher or same as the
-                original price.
-              </p>
-            }
-
             <button
               type="submit"
-              class="w-full bg-cyan-700 text-white py-2 rounded-lg transition-colors hover:bg-cyan-800 cursor-pointer sm:col-span-2"
+              class="w-full bg-cyan-700 text-white py-2 rounded-lg transition-colors hover:bg-cyan-800 cursor-pointer sm:col-span-2 disabled:bg-gray-400 disabled:cursor-default"
+              [disabled]="offreForm().invalid()"
             >
               Send Offer
             </button>
@@ -169,8 +192,9 @@
           </label>
           <select
             id="offer-sort"
-            class="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-10 text-sm font-medium text-gray-700 shadow-sm outline-none transition focus:border-cyan-600 hover:border-cyan-600 focus:ring-2 focus:ring-cyan-100 hover:ring-2 hover:ring-cyan-100"
-            (change)="sortOffers($event)"
+            class="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-10 text-sm font-medium text-gray-700 shadow-sm outline-none focus:ring-2 focus:ring-cyan-600 hover:ring-2 hover:ring-cyan-600 transition"
+            #sortSelect
+            (change)="sortOffers(sortSelect.value)"
           >
             <option value="mostRecent">Most recent</option>
             <option value="amount">Amount</option>

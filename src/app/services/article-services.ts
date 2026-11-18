@@ -1,5 +1,6 @@
 import { Service, signal } from '@angular/core';
 import { Article } from '../models/article';
+import { Offre } from '../models/offre';
 
 @Service()
 export class ArticleServices {
@@ -119,5 +120,21 @@ export class ArticleServices {
   readonly articles = this._articles.asReadonly();
   getArticleById(id: string): Article | undefined {
     return this._articles().find((article) => article.id == id);
+  }
+  addOfferToArticle(articleId: string, offer: Offre): boolean {
+    const article = this.getArticleById(articleId);
+    if (article) {
+      this._articles.update((articles) => {
+        const updatedArticles = articles.map((a) => {
+          if (a.id === articleId) {
+            return { ...a, offres: [...a.offres, offer] };
+          }
+          return a;
+        });
+        return updatedArticles;
+      });
+      return true;
+    }
+    return false;
   }
 }
