@@ -1,6 +1,20 @@
 <div class="py-8">
   <h1 class="text-2xl font-bold text-gray-800 mb-6">Articles</h1>
-  <!-- Filter and sort options I will implement later -->
+  <div class="flex items-center gap-2 mb-6">
+    <label for="sort" class="text-sm font-medium text-gray-700">Sort by</label>
+    <select
+      #sortSelect
+      (change)="onSort(sortSelect.value)"
+      class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800
+             focus:outline-none focus:ring-2 focus:ring-cyan-600 hover:ring-2 hover:ring-cyan-600 transition"
+    >
+      <option value="newest">Newest first</option>
+      <option value="price-asc">Price: low to high</option>
+      <option value="price-desc">Price: high to low</option>
+      <option value="name">Name: A to Z</option>
+      <option value="deadline">Ending soon</option>
+    </select>
+  </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
     @for (article of articles(); track article.id) {
       <app-article-card [article]="article" base="/articles" />
