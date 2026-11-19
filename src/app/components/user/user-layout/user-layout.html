@@ -1,30 +1,45 @@
-<div class="bg-stone-50 min-h-screen">
-  <nav class="bg-cyan-700 text-white grid grid-cols-3 items-center p-5">
-    <h4 class="text-xl font-bold cursor-default justify-self-start">Souk El Khorda</h4>
-    <div class="flex gap-4 justify-self-center">
-      <a
-        class="hover:text-white/80"
-        routerLinkActive="font-bold border-b-2 border-white"
-        [routerLink]="['/articles']"
-      >
-        Articles
-      </a>
-      <a
-        class="hover:text-white/80"
-        routerLinkActive="font-bold border-b-2 border-white"
-        [routerLink]="['/about']"
-      >
-        About Us
-      </a>
-    </div>
-    <a
-      class="border border-white font-medium px-4 py-2 rounded transition-colors hover:bg-white hover:text-cyan-700 justify-self-end"
-      [routerLink]="['/login']"
+<div class="flex min-h-screen flex-col bg-stone-50">
+  <nav class="sticky top-0 z-10 bg-cyan-700 text-white shadow-md">
+    <div
+      class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-4 md:grid md:grid-cols-3"
     >
-      Login
-    </a>
+      <a [routerLink]="['/articles']" class="justify-self-start leading-tight">
+        <span class="block text-xl font-bold">Souk El Khorda</span>
+        <span class="block text-xs text-cyan-100">سوق الخردة</span>
+      </a>
+
+      <div class="flex items-center gap-6 justify-self-center">
+        <a
+          class="border-b-2 border-transparent pb-1 text-cyan-100 transition-colors hover:text-white"
+          routerLinkActive="!border-white !text-white font-semibold"
+          [routerLink]="['/articles']"
+        >
+          Articles
+        </a>
+        <a
+          class="border-b-2 border-transparent pb-1 text-cyan-100 transition-colors hover:text-white"
+          routerLinkActive="!border-white !text-white font-semibold"
+          [routerLink]="['/about']"
+        >
+          About Us
+        </a>
+      </div>
+
+      <a
+        class="justify-self-end rounded-lg border border-white/70 px-4 py-2 text-sm font-medium transition-colors hover:bg-white hover:text-cyan-700"
+        [routerLink]="['/login']"
+      >
+        Admin login
+      </a>
+
+    </div>
   </nav>
-  <main class="max-w-6xl mx-auto px-4">
+
+  <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
     <router-outlet></router-outlet>
   </main>
+
+  <footer class="border-t border-gray-200 bg-white py-4 text-center text-sm text-gray-500">
+    Souk El Khorda · ISET-Charguia · DSI 21 · 2026-2027
+  </footer>
 </div>

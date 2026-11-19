@@ -1,2 +1,74 @@
-<p>admin-layout works!</p>
-<router-outlet></router-outlet>
+@if (currentAdmin()) {
+  <div class="bg-stone-50 min-h-screen">
+    <nav class="bg-slate-800 text-white shadow-md">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <div class="flex items-center gap-3">
+          <a [routerLink]="['/admin/articles']" class="text-xl font-bold">Souk El Khorda</a>
+          <span
+            class="rounded-full bg-cyan-600 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide"
+          >
+            Welcome, {{ currentAdmin()?.name }}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-6">
+          <a
+            class="border-b-2 border-transparent pb-1 text-slate-300 transition-colors hover:text-white"
+            routerLinkActive="!border-cyan-400 !text-white font-semibold"
+            [routerLinkActiveOptions]="{ exact: true }"
+            [routerLink]="['/admin/articles']"
+          >
+            Articles
+          </a>
+          <a
+            class="border-b-2 border-transparent pb-1 text-slate-300 transition-colors hover:text-white"
+            routerLinkActive="!border-cyan-400 !text-white font-semibold"
+            [routerLink]="['/admin/articles/new']"
+          >
+            Create Article
+          </a>
+          <a
+            class="border-b-2 border-transparent pb-1 text-slate-300 transition-colors hover:text-white"
+            routerLinkActive="!border-cyan-400 !text-white font-semibold"
+            [routerLink]="['/admin/change-password']"
+          >
+            Password
+          </a>
+        </div>
+
+        <a
+          class="rounded-lg border border-slate-500 px-4 py-2 text-sm font-medium transition-colors hover:bg-white hover:text-slate-800"
+          (click)="logout()"
+          [routerLink]="['/articles']"
+        >
+          Logout
+        </a>
+      </div>
+    </nav>
+
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="border-t border-gray-200 bg-white py-4 text-center text-sm text-gray-500">
+      Souk El Khorda · ISET-Charguia · DSI 21 · 2026-2027
+    </footer>
+  </div>
+} @else {
+  <div class="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow-md p-8 w-full max-w-md text-center space-y-4">
+      <p class="text-6xl font-extrabold text-cyan-700">404</p>
+
+      <h1 class="text-2xl font-bold text-gray-800">Page not found</h1>
+
+      <p class="text-gray-500">You seem to be lost.</p>
+
+      <a
+        [routerLink]="['/login']"
+        class="inline-block bg-cyan-700 text-white px-5 py-2 rounded-lg transition-colors hover:bg-cyan-800"
+      >
+        Back to the login
+      </a>
+    </div>
+  </div>
+}
