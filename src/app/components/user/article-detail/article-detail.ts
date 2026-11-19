@@ -63,10 +63,6 @@ export class ArticleDetail implements OnInit {
   onSubmit() {
     this.offerSuccess.set(false);
 
-    if (this.offreForm().invalid()) {
-      console.error('Form is invalid:', this.offreForm().errors);
-      return;
-    }
     const articleId = this.article()?.id;
     if (!articleId) {
       console.error('Cannot add offer: article is not loaded');
