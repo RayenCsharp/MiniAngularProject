@@ -1,1 +1,20 @@
-<p>error works!</p>
+<div class="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+  <div class="bg-white rounded-xl shadow-md p-8 w-full max-w-md text-center space-y-4">
+
+    <p class="text-6xl font-extrabold text-cyan-700">404</p>
+
+    <h1 class="text-2xl font-bold text-gray-800">Page not found</h1>
+
+    <p class="text-gray-500">
+      The page you are looking for does not exist or has been moved.
+    </p>
+
+    <a
+      [routerLink]="['/articles']"
+      class="inline-block bg-cyan-700 text-white px-5 py-2 rounded-lg transition-colors hover:bg-cyan-800"
+    >
+      Back to the shop
+    </a>
+
+  </div>
+</div>
