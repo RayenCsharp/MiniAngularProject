@@ -1,1 +1,175 @@
-<p>article-form works!</p>
+<div class="mx-auto max-w-2xl">
+  <h1 class="mb-6 text-2xl font-bold text-gray-800">Create article</h1>
+
+  <form
+    class="rounded-2xl border border-gray-200 bg-white p-6 shadow-md"
+    [formRoot]="articleForm"
+    (submit)="onSubmit()"
+  >
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      @if(successMessage()) {
+        <div
+          class="col-span-full rounded-lg bg-green-100 px-4 py-2 text-green-800"
+        >
+          Article added successfully!
+        </div>
+      }
+      <!-- Name -->
+      <div class="space-y-1 sm:col-span-2">
+        <label for="nom" class="block text-sm font-medium text-gray-700">Name</label>
+        <input
+          id="nom"
+          type="text"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.nom"
+        />
+        @if (articleForm.nom().invalid() && articleForm.nom().dirty()) {
+          @for (error of articleForm.nom().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Photo -->
+      <div class="space-y-1 sm:col-span-2">
+        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+        <input
+          id="photo"
+          type="url"
+          placeholder="https://..."
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.photo"
+        />
+        @if (articleForm.photo().invalid() && articleForm.photo().dirty()) {
+          @for (error of articleForm.photo().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Price -->
+      <div class="space-y-1">
+        <label for="prix" class="block text-sm font-medium text-gray-700">Price (TND)</label>
+        <input
+          id="prix"
+          type="number"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.prix"
+        />
+        @if (articleForm.prix().invalid() && articleForm.prix().dirty()) {
+          @for (error of articleForm.prix().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Category -->
+      <div class="space-y-1">
+        <label for="categorie" class="block text-sm font-medium text-gray-700">Category</label>
+        <select
+          id="categorie"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.categorie"
+        >
+          <option value="">Choose...</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Books">Books</option>
+          <option value="Digital">Digital</option>
+          <option value="Sports">Sports</option>
+          <option value="Other">Other</option>
+        </select>
+        @if (articleForm.categorie().invalid() && articleForm.categorie().dirty()) {
+          @for (error of articleForm.categorie().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Condition -->
+      <div class="space-y-1">
+        <label for="etat" class="block text-sm font-medium text-gray-700">Condition</label>
+        <select
+          id="etat"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.etat"
+        >
+          <option value="">Choose...</option>
+          <option value="new">New</option>
+          <option value="good">Good</option>
+          <option value="used">Used</option>
+        </select>
+        @if (articleForm.etat().invalid() && articleForm.etat().dirty()) {
+          @for (error of articleForm.etat().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Deadline -->
+      <div class="space-y-1">
+        <label for="deadline" class="block text-sm font-medium text-gray-700">Deadline</label>
+        <input
+          id="deadline"
+          type="date"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.deadline"
+        />
+        @if (articleForm.deadline().invalid() && articleForm.deadline().dirty()) {
+          @for (error of articleForm.deadline().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="space-y-1 sm:col-span-2">
+        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea
+          id="description"
+          rows="4"
+          class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+          [formField]="articleForm.description"
+        ></textarea>
+        @if (articleForm.description().invalid() && articleForm.description().dirty()) {
+          @for (error of articleForm.description().errors(); track $index) {
+            <p class="text-sm text-red-600">{{ error.message }}</p>
+          }
+        }
+      </div>
+
+      <!-- Negotiable -->
+      <label
+        class="flex items-center gap-3 rounded-xl bg-gray-50 p-4 ring-1 ring-gray-100 sm:col-span-2"
+      >
+        <input
+          type="checkbox"
+          class="h-4 w-4 accent-cyan-700"
+          [formField]="articleForm.negociable"
+        />
+        <span class="text-sm text-gray-700">
+          <span class="font-medium">Negotiable.</span>
+          Buyers may offer less than the price. If unchecked, offers must be at least the price.
+        </span>
+      </label>
+
+      <!-- Buttons -->
+      <div class="flex items-center justify-end gap-3 sm:col-span-2">
+        <a
+          [routerLink]="['/admin/articles']"
+          class="rounded-lg border border-gray-300 px-5 py-2 text-gray-700 transition-colors hover:bg-gray-100"
+        >
+          Cancel
+        </a>
+        <button
+          type="submit"
+          class="rounded-lg bg-cyan-700 px-5 py-2 text-white transition-colors hover:bg-cyan-800 disabled:cursor-default disabled:bg-gray-400"
+          [disabled]="articleForm().invalid()"
+        >
+          Create article
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

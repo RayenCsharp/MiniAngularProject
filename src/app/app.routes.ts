@@ -28,7 +28,7 @@ export const routes: Routes = [
     { path: '', redirectTo: 'articles', pathMatch: 'full' },
     { path: 'articles', title: 'Articles', component: AdminArticleList, data: { baseUrl: '/admin/articles' } },
     { path: 'articles/new', title: 'New Article', component: ArticleForm },
-    { path: 'articles/:id/edit', title: 'Edit Article', component: ArticleEdit },
+    { path: 'articles/:id', title: 'Edit Article', component: ArticleEdit },
     { path: 'change-password', title: 'Change Password', component: ChangePassword },
   ] },
   { path: '**', title: 'error', component: Error },

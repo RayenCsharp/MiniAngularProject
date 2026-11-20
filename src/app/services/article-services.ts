@@ -121,6 +121,11 @@ export class ArticleServices {
   getArticleById(id: string): Article | undefined {
     return this._articles().find((article) => article.id == id);
   }
+  addArticle(article: Article): boolean {
+    this._articles.update((articles) => [...articles, article]);
+    return true;
+  }
+
   addOfferToArticle(articleId: string, offer: Offre): boolean {
     const article = this.getArticleById(articleId);
     if (article) {
