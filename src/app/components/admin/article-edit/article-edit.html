@@ -1,1 +1,485 @@
-<p>article-edit works!</p>
+<div class="mx-auto max-w-4xl space-y-6">
+  <a
+    [routerLink]="['/admin/articles']"
+    class="inline-flex items-center gap-2 text-sm text-cyan-700 hover:underline"
+  >
+    <span aria-hidden="true">←</span>
+    Back to articles
+  </a>
+
+  @if (successMessage()) {
+    <div
+      class="rounded-lg border border-green-200 bg-green-100 px-4 py-2 text-sm text-green-800"
+      role="status"
+    >
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (article(); as a) {
+    @if (!editing()) {
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="mt-1 text-2xl font-bold text-gray-800">{{ a.nom }}</h1>
+        </div>
+
+        <div class="flex shrink-0 gap-3">
+          <button
+            type="button"
+            (click)="startEdit()"
+            class="cursor-pointer rounded-lg border border-gray-300 px-5 py-2 text-gray-700 transition-colors hover:bg-gray-100"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            (click)="onDelete()"
+            class="cursor-pointer rounded-lg border border-red-300 px-5 py-2 text-red-600 transition-colors hover:bg-red-50"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <section class="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <img
+          [src]="a.photo"
+          [alt]="a.nom"
+          class="h-80 w-full rounded-xl object-cover shadow-md"
+          [class.grayscale]="!a.disponible"
+        />
+
+        <div class="space-y-4 rounded-xl bg-white p-6 shadow-md">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+              {{ a.categorie }}
+            </span>
+            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold capitalize text-gray-700">
+              {{ a.etat }} condition
+            </span>
+            <span
+              class="rounded-full px-3 py-1 text-xs font-semibold"
+              [class]="a.disponible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+            >
+              {{ a.disponible ? 'Available' : 'Sold' }}
+            </span>
+          </div>
+
+          <p class="text-2xl font-bold text-orange-600">{{ a.prix }} TND</p>
+          <p class="text-gray-700">{{ a.description }}</p>
+
+          <dl class="grid grid-cols-2 gap-3 border-t pt-4 text-sm">
+            <div>
+              <dt class="text-gray-500">Negotiable</dt>
+              <dd class="font-medium text-gray-800">{{ a.negociable ? 'Yes' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt class="text-gray-500">Total offers</dt>
+              <dd class="font-medium text-gray-800">{{ offers()?.length || 0 }}</dd>
+            </div>
+            <div>
+              <dt class="text-gray-500">Published</dt>
+              <dd class="font-medium text-gray-800">{{ a.datePublication | date: 'MMM d, y' }}</dd>
+            </div>
+            <div>
+              <dt class="text-gray-500">Deadline</dt>
+              <dd class="font-medium text-gray-800">{{ a.deadline | countdown }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    } @else {
+      <h1 class="text-2xl font-bold text-gray-800">Edit article</h1>
+
+      <form
+        class="rounded-2xl border border-gray-200 bg-white p-6 shadow-md"
+        [formRoot]="articleForm"
+        (submit)="onSubmit()"
+      >
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="space-y-1 sm:col-span-2">
+            <label for="nom" class="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              id="nom"
+              type="text"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.nom"
+            />
+            @if (articleForm.nom().invalid() && articleForm.nom().dirty()) {
+              @for (error of articleForm.nom().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <div class="space-y-1 sm:col-span-2">
+            <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+            <input
+              id="photo"
+              type="url"
+              placeholder="https://..."
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.photo"
+            />
+            @if (articleForm.photo().invalid() && articleForm.photo().dirty()) {
+              @for (error of articleForm.photo().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <div class="space-y-1">
+            <label for="prix" class="block text-sm font-medium text-gray-700">Price (TND)</label>
+            <input
+              id="prix"
+              type="number"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.prix"
+            />
+            @if (articleForm.prix().invalid() && articleForm.prix().dirty()) {
+              @for (error of articleForm.prix().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <div class="space-y-1">
+            <label for="categorie" class="block text-sm font-medium text-gray-700">Category</label>
+            <select
+              id="categorie"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.categorie"
+            >
+              <option value="">Choose...</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Books">Books</option>
+              <option value="Digital">Digital</option>
+              <option value="Sports">Sports</option>
+              <option value="Other">Other</option>
+            </select>
+            @if (articleForm.categorie().invalid() && articleForm.categorie().dirty()) {
+              @for (error of articleForm.categorie().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <div class="space-y-1">
+            <label for="etat" class="block text-sm font-medium text-gray-700">Condition</label>
+            <select
+              id="etat"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.etat"
+            >
+              <option value="">Choose...</option>
+              <option value="new">New</option>
+              <option value="good">Good</option>
+              <option value="used">Used</option>
+            </select>
+            @if (articleForm.etat().invalid() && articleForm.etat().dirty()) {
+              @for (error of articleForm.etat().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <div class="space-y-1">
+            <label for="deadline" class="block text-sm font-medium text-gray-700">Deadline</label>
+            <input
+              id="deadline"
+              type="date"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.deadline"
+            />
+            @if (articleForm.deadline().invalid() && articleForm.deadline().dirty()) {
+              @for (error of articleForm.deadline().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <div class="space-y-1 sm:col-span-2">
+            <label for="description" class="block text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              id="description"
+              rows="4"
+              class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              [formField]="articleForm.description"
+            ></textarea>
+            @if (articleForm.description().invalid() && articleForm.description().dirty()) {
+              @for (error of articleForm.description().errors(); track $index) {
+                <p class="text-sm text-red-600">{{ error.message }}</p>
+              }
+            }
+          </div>
+
+          <label class="flex items-center gap-3 rounded-xl bg-gray-50 p-4 ring-1 ring-gray-100 sm:col-span-2">
+            <input
+              type="checkbox"
+              class="h-4 w-4 accent-cyan-700"
+              [formField]="articleForm.negociable"
+            />
+            <span class="text-sm text-gray-700">
+              <span class="font-medium">Negotiable.</span>
+              Buyers may offer less than the price. If unchecked, offers must be at least the price.
+            </span>
+          </label>
+
+          <label class="flex items-center gap-3 rounded-xl bg-gray-50 p-4 ring-1 ring-gray-100 sm:col-span-2">
+            <input
+              type="checkbox"
+              class="h-4 w-4 accent-cyan-700"
+              [formField]="articleForm.disponible"
+            />
+            <span class="text-sm text-gray-700"><span class="font-medium">Available.</span>
+              The article is available for sale. If unchecked, the offers will not be accepted.</span>
+          </label>
+
+          <div class="flex items-center justify-end gap-3 sm:col-span-2">
+            <button
+              type="button"
+              (click)="cancelEdit()"
+              class="rounded-lg border border-gray-300 px-5 py-2 text-gray-700 transition-colors hover:bg-gray-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              [disabled]="articleForm().invalid()"
+              class="cursor-pointer rounded-lg bg-cyan-700 px-5 py-2 text-white transition-colors hover:bg-cyan-800 disabled:cursor-default disabled:bg-gray-400"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+
+    <section class="rounded-xl bg-white p-6 shadow-md">
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-xl font-bold text-gray-800">
+          Offers
+          <span class="ml-1 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-cyan-100 px-2 text-sm text-cyan-800">
+            {{ offers()?.length || 0 }}
+          </span>
+        </h2>
+
+        <div class="flex items-center gap-2">
+          <label for="offerSort" class="text-sm font-medium text-gray-700">Sort by</label>
+          <select
+            id="offerSort"
+            #offerSort
+            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-600 hover:cursor-pointer hover:outline-none hover:ring-2 hover:ring-cyan-600"
+            (change)="sortOffers(offerSort.value)"
+          >
+            <option value="newest">Newest first</option>
+            <option value="amount">Highest amount</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+      </div>
+
+      @if (offers()?.length) {
+        <div class="space-y-3">
+          @for (offer of offers(); track offer.id) {
+            <article
+              class="grid grid-cols-1 items-center gap-3 rounded-xl border border-gray-200 p-4 sm:grid-cols-[minmax(220px,1fr)_130px_90px_auto]"
+              [class.border-orange-300]="highestOfferId() === offer.id"
+              [class.bg-orange-50]="highestOfferId() === offer.id"
+            >
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-100 font-bold text-cyan-800">
+                  {{ offer.nomAcheteur.charAt(0).toUpperCase() }}
+                </div>
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <strong class="text-sm text-gray-800">{{ offer.nomAcheteur }}</strong>
+                    @if (highestOfferId() === offer.id) {
+                      <span class="rounded-full bg-orange-100 px-2 py-1 text-xs font-semibold text-orange-700">
+                        Highest offer
+                      </span>
+                    }
+                  </div>
+                  @if (offer.status === 'accepted') {
+                    <p class="text-xs text-gray-500">
+                      {{ offer.emailAcheteur }} · {{ offer.telephoneAcheteur }}
+                    </p>
+                  } @else {
+                    <p class="truncate text-xs text-gray-500">
+                      {{ offer.message || 'No message provided' }}
+                    </p>
+                  }
+                </div>
+              </div>
+
+              <div>
+                <strong class="block font-bold text-orange-600">{{ offer.montant }} TND</strong>
+                <span class="text-xs text-gray-500">{{ offer.date | date: 'MMM d, y' }}</span>
+              </div>
+
+              <span
+                class="w-fit rounded-full px-2 py-1 text-xs font-semibold capitalize"
+                [class]="offer.status === 'waiting'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : offer.status === 'accepted'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'"
+              >
+                {{ offer.status }}
+              </span>
+
+              <div class="flex justify-end gap-2">
+                @if (a.disponible && offer.status === 'waiting') {
+                  <button
+                    type="button"
+                    (click)="acceptOffer(offer.id)"
+                    class="cursor-pointer rounded-lg bg-cyan-700 px-3 py-2 text-sm text-white transition-colors hover:bg-cyan-800"
+                  >
+                    ✓ Accept
+                  </button>
+                  <button
+                    type="button"
+                    (click)="rejectOffer(offer.id)"
+                    class="cursor-pointer rounded-lg border border-red-300 px-3 py-2 text-sm text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    × Reject
+                  </button>
+                }@else if( offer.status === 'accepted') {
+                  <button
+                    type="button"
+                    (click)="openOfferInfo(offer)"
+                    class="cursor-pointer rounded-lg border border-cyan-700 px-3 py-2 text-sm text-cyan-700 transition-colors hover:bg-cyan-50"
+                  >
+                    Info
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
+          <p class="text-lg font-medium text-gray-600">No offers yet.</p>
+          <p class="mt-1 text-sm text-gray-500">New buyer offers will appear here.</p>
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="rounded-xl bg-white p-8 text-center shadow-md">
+      <p class="text-5xl font-extrabold text-cyan-700">404</p>
+      <h1 class="mt-2 text-2xl font-bold text-gray-800">Article not found</h1>
+      <a
+        [routerLink]="['/admin/articles']"
+        class="mt-4 inline-block text-cyan-700 hover:underline"
+      >
+        Back to articles
+      </a>
+    </div>
+  }
+</div>
+
+@if (deleteDialogOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-dialog-title"
+  >
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <h2 id="delete-dialog-title" class="mt-4 text-xl font-bold text-gray-800">
+        Delete article
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-gray-600">
+        Are you sure you want to delete
+        <strong class="font-semibold text-gray-800">{{ article()?.nom }}</strong>?
+        This action cannot be undone.
+      </p>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancelDelete()"
+          class="cursor-pointer rounded-lg border border-gray-300 px-5 py-2 text-gray-700 transition-colors hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="confirmDelete()"
+          class="cursor-pointer rounded-lg bg-red-600 px-5 py-2 text-white transition-colors hover:bg-red-700"
+        >
+          Delete article
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (infoDialogOpen(); as open) {
+  @if (selectedOffer(); as offer) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="offer-info-title"
+      (click)="closeOfferInfo()"
+    >
+      <div
+        class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-100 text-lg font-bold text-cyan-800">
+              {{ offer.nomAcheteur.charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-cyan-700">Accepted offer</p>
+              <h2 id="offer-info-title" class="mt-1 text-xl font-bold text-gray-800">
+                {{ offer.nomAcheteur }}
+              </h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeOfferInfo()"
+            class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-gray-300 text-lg text-gray-500 transition-colors hover:bg-gray-100"
+            aria-label="Close customer information"
+          >
+            ×
+          </button>
+        </div>
+
+        <dl class="mt-6 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+          <div class="rounded-lg bg-gray-50 p-3">
+            <dt class="text-gray-500">Email</dt>
+            <dd class="mt-1 break-all font-medium text-gray-800">{{ offer.emailAcheteur }}</dd>
+          </div>
+          <div class="rounded-lg bg-gray-50 p-3">
+            <dt class="text-gray-500">Phone</dt>
+            <dd class="mt-1 font-medium text-gray-800">{{ offer.telephoneAcheteur }}</dd>
+          </div>
+          <div class="rounded-lg bg-gray-50 p-3">
+            <dt class="text-gray-500">Offered amount</dt>
+            <dd class="mt-1 font-bold text-orange-600">{{ offer.montant }} TND</dd>
+          </div>
+          <div class="rounded-lg bg-gray-50 p-3">
+            <dt class="text-gray-500">Offer date</dt>
+            <dd class="mt-1 font-medium text-gray-800">{{ offer.date | date: 'MMM d, y' }}</dd>
+          </div>
+        </dl>
+
+        @if (offer.message) {
+          <div class="mt-3 rounded-lg border border-gray-200 p-3">
+            <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Message</p>
+            <p class="mt-1 text-sm leading-relaxed text-gray-700">{{ offer.message }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+}

@@ -10,8 +10,8 @@ import {
   minLength,
   min,
   required,
-  validate,
   pattern,
+  minDate,
 } from '@angular/forms/signals';
 
 @Component({
@@ -47,15 +47,7 @@ export class ArticleForm {
     required(path.categorie, { message: 'Category is required' });
     required(path.etat, { message: 'State is required' });
     required(path.deadline, { message: 'Deadline is required' });
-    validate(path.deadline, ({ value }) => {
-      if (!value()) return null;
-      const today = new Date().toLocaleDateString('en-CA');
-      const deadline = new Date(value()).toLocaleDateString('en-CA');
-      if (deadline <= today) {
-        return { kind: 'deadline', message: 'Deadline must be a future date' };
-      }
-      return null;
-    });
+    minDate(path.deadline, () => new Date(), { message: 'Deadline must be a future date' });
     required(path.description, { message: 'Description is required' });
     minLength(path.description, 30, { message: 'Description must be at least 30 characters' });
     maxLength(path.description, 500, {

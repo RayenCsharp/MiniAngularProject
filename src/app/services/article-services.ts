@@ -126,18 +126,62 @@ export class ArticleServices {
     return true;
   }
 
+  updateArticle(updatedArticle: Article): boolean {
+    const exists = this._articles().some((article) => article.id === updatedArticle.id);
+    if (!exists) return false;
+
+    this._articles.update((articles) =>
+      articles.map((article) => (article.id === updatedArticle.id ? updatedArticle : article)),
+    );
+    return true;
+  }
+
+  deleteArticle(articleId: string): boolean {
+    const exists = this._articles().some((article) => article.id === articleId);
+    if (!exists) return false;
+
+    this._articles.update((articles) => articles.filter((article) => article.id !== articleId));
+    return true;
+  }
+
+  updateOfferStatus(articleId: string, offerId: string, status: Offre['status']): boolean {
+    const article = this.getArticleById(articleId);
+    if (!article) return false;
+
+    this._articles.update((articles) =>
+      articles.map((currentArticle) =>
+        currentArticle.id === articleId
+          ? {
+              ...currentArticle,
+              disponible: status === 'accepted' ? false : currentArticle.disponible,
+              offres: currentArticle.offres.map((offer) =>
+                status === 'accepted'
+                  ? {
+                      ...offer,
+                      status: offer.id === offerId ? 'accepted' : 'refused',
+                    }
+                  : offer.id === offerId
+                    ? { ...offer, status: status }
+                    : offer,
+              ),
+            }
+          : currentArticle,
+      ),
+    );
+    return true;
+  }
+
   addOfferToArticle(articleId: string, offer: Offre): boolean {
     const article = this.getArticleById(articleId);
     if (article) {
-      this._articles.update((articles) => {
-        const updatedArticles = articles.map((a) => {
+      this._articles.update((articles) =>
+        articles.map((a) => {
           if (a.id === articleId) {
             return { ...a, offres: [...a.offres, offer] };
           }
           return a;
-        });
-        return updatedArticles;
-      });
+        }),
+      );
       return true;
     }
     return false;
