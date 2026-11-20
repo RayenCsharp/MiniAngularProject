@@ -1,8 +1,10 @@
 @if (currentAdmin()) {
-  <div class="bg-stone-50 min-h-screen">
+  <div class="flex min-h-screen flex-col bg-stone-50">
     <nav class="bg-slate-800 text-white shadow-md">
-      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-        <div class="flex items-center gap-3">
+      <div
+        class="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-4 md:grid md:grid-cols-3"
+      >
+        <div class="flex items-center gap-3 md:justify-self-start">
           <a [routerLink]="['/admin/articles']" class="text-xl font-bold">Souk El Khorda</a>
           <span
             class="rounded-full bg-cyan-600 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide"
@@ -11,7 +13,7 @@
           </span>
         </div>
 
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-6 md:justify-self-center">
           <a
             class="border-b-2 border-transparent pb-1 text-slate-300 transition-colors hover:text-white"
             routerLinkActive="!border-cyan-400 !text-white font-semibold"
@@ -36,13 +38,13 @@
           </a>
         </div>
 
-        <a
-          class="rounded-lg border border-slate-500 px-4 py-2 text-sm font-medium transition-colors hover:bg-white hover:text-slate-800"
+        <button
+          class="cursor-pointer rounded-lg border border-slate-500 px-4 py-2 text-sm font-medium transition-colors hover:bg-white hover:text-slate-800 md:justify-self-end"
           (click)="logout()"
           [routerLink]="['/articles']"
         >
           Logout
-        </a>
+        </button>
       </div>
     </nav>
 
