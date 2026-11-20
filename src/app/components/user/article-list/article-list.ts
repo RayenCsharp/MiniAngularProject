@@ -1,4 +1,4 @@
-import { Component, inject, Signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ArticleCard } from '../../shared/article-card/article-card';
 import { Article } from '../../../models/article';
 import { ArticleServices } from '../../../services/article-services';
@@ -11,19 +11,56 @@ import { ArticleServices } from '../../../services/article-services';
 })
 export class ArticleList {
   private readonly articleServices = inject(ArticleServices);
-  articles: Signal<Article[]> = this.articleServices.articles;
+  search = signal('');
+  category = signal('all');
+  sort = signal('newest');
+  articles = signal<Article[]>(this.articleServices.articles());
+
+  updateArticles() {
+    const title = this.search().trim();
+    const category = this.category();
+    let filtered = title
+      ? this.articleServices.getArticlesByTitle(title)
+      : [...this.articleServices.articles()];
+
+    if (category !== 'all') {
+      const categoryIds = this.articleServices.getArticlesByCategory(category).map((article) => article.id)
+      
+      filtered = filtered.filter((article) => categoryIds.includes(article.id));
+    }
+
+    this.articles.set(filtered);
+    this.onSort(this.sort());
+  }
+
+  onSearch(value: string) {
+    this.search.set(value);
+    this.updateArticles();
+  }
+
+  onCategoryChange(value: string) {
+    this.category.set(value);
+    this.updateArticles();
+  }
 
   onSort(sortValue: string) {
+    this.sort.set(sortValue);
+    const articles = this.articles();
+
     if (sortValue === 'newest') {
-      this.articles().sort((a, b) => b.datePublication.getTime() - a.datePublication.getTime());
+      articles.sort(
+        (a, b) => b.datePublication.getTime() - a.datePublication.getTime(),
+      );
     } else if (sortValue === 'price-asc') {
-      this.articles().sort((a, b) => a.prix - b.prix);
+      articles.sort((a, b) => a.prix - b.prix);
     } else if (sortValue === 'price-desc') {
-      this.articles().sort((a, b) => b.prix - a.prix);
+      articles.sort((a, b) => b.prix - a.prix);
     } else if (sortValue === 'name') {
-      this.articles().sort((a, b) => a.nom.localeCompare(b.nom));
+      articles.sort((a, b) => a.nom.localeCompare(b.nom));
     } else if (sortValue === 'deadline') {
-      this.articles().sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+      articles.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
     }
+
+    this.articles.set([...articles]);
   }
 }

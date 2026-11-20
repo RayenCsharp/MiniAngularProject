@@ -1,21 +1,51 @@
 <div class="py-8">
   <h1 class="text-2xl font-bold text-gray-800 mb-6">Articles</h1>
-  <div class="flex items-center gap-2 mb-6">
-    <label for="sort" class="text-sm font-medium text-gray-700">Sort by</label>
-    <select
-      #sortSelect
-      (change)="onSort(sortSelect.value)"
-      class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800
-             focus:outline-none focus:ring-2 focus:ring-cyan-600 hover:ring-2 hover:ring-cyan-600 transition"
-    >
-      <option value="newest">Newest first</option>
-      <option value="price-asc">Price: low to high</option>
-      <option value="price-desc">Price: high to low</option>
-      <option value="name">Name: A to Z</option>
-      <option value="deadline">Ending soon</option>
-    </select>
+  <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="sm:col-span-2">
+      <label for="search" class="mb-1 block text-sm font-medium text-gray-700">Search</label>
+      <input
+        id="search"
+        type="search"
+        placeholder="Search articles..."
+        #searchInput
+        (input)="onSearch(searchInput.value)"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+      />
+    </div>
+    <div>
+      <label for="category" class="mb-1 block text-sm font-medium text-gray-700">Category</label>
+      <select
+        id="category"
+        #categorySelect
+        (change)="onCategoryChange(categorySelect.value)"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+      >
+        <option value="all">All categories</option>
+        <option value="Clothing">Clothing</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Books">Books</option>
+        <option value="Digital">Digital</option>
+        <option value="Sports">Sports</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div>
+      <label for="sort" class="mb-1 block text-sm font-medium text-gray-700">Sort by</label>
+      <select
+        id="sort"
+        #sortSelect
+        (change)="onSort(sortSelect.value)"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+      >
+        <option value="newest">Newest first</option>
+        <option value="price-asc">Price: low to high</option>
+        <option value="price-desc">Price: high to low</option>
+        <option value="name">Name: A to Z</option>
+        <option value="deadline">Ending soon</option>
+      </select>
+    </div>
   </div>
-  // i will add a search bar here later
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
     @for (article of articles(); track article.id) {
       <app-article-card [article]="article" base="/articles" />

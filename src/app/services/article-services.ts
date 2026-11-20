@@ -121,6 +121,19 @@ export class ArticleServices {
   getArticleById(id: string): Article | undefined {
     return this._articles().find((article) => article.id == id);
   }
+
+  getArticlesByTitle(title: string): Article[] {
+    const lowerTitle = title.toLowerCase();
+    return this._articles().filter((article) => article.nom.toLowerCase().includes(lowerTitle));
+  }
+
+  getArticlesByCategory(category: string): Article[] {
+    const lowerCategory = category.toLowerCase();
+    return this._articles().filter((article) =>
+      article.categorie.toLowerCase().includes(lowerCategory),
+    );
+  }
+
   addArticle(article: Article): boolean {
     this._articles.update((articles) => [...articles, article]);
     return true;

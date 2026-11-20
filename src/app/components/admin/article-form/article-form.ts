@@ -1,5 +1,4 @@
 import { Component, signal, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { ArticleServices } from '../../../services/article-services';
 import { Article } from '../../../models/article';
 import {
@@ -15,7 +14,7 @@ import {
 } from '@angular/forms/signals';
 
 @Component({
-  imports: [RouterLink, FormField, FormRoot],
+  imports: [ FormField, FormRoot],
   selector: 'app-article-form',
   styleUrl: './article-form.css',
   templateUrl: './article-form.html',
