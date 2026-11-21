@@ -3,13 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { ArticleServices } from '../../../services/article-services';
 import { Article } from '../../../models/article';
 import { RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Offre } from '../../../models/offre';
 import { CountdownPipe } from '../../../pipes/countdown-pipe';
 import { form, FormField, FormRoot, required, email, pattern, min } from '@angular/forms/signals';
 
 @Component({
-  imports: [RouterLink, DatePipe, CountdownPipe, FormField, FormRoot],
+  imports: [RouterLink, DatePipe, CountdownPipe, FormField, FormRoot, DecimalPipe],
   selector: 'app-article-detail',
   styleUrl: './article-detail.css',
   templateUrl: './article-detail.html',

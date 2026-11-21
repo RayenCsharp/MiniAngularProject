@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ArticleServices } from '../../../services/article-services';
 import { Article } from '../../../models/article';
 import { RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Offre } from '../../../models/offre';
 import { CountdownPipe } from '../../../pipes/countdown-pipe';
 import {
@@ -19,7 +19,7 @@ import {
 } from '@angular/forms/signals';
 
 @Component({
-  imports: [RouterLink, DatePipe, CountdownPipe, FormField, FormRoot],
+  imports: [RouterLink, DatePipe, CountdownPipe, FormField, FormRoot, DecimalPipe],
   selector: 'app-article-edit',
   templateUrl: './article-edit.html',
 })

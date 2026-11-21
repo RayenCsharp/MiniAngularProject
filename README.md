@@ -1,59 +1,113 @@
-# MiniProjet
+# Souk El Khorda (سوق الخردة)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.8.
+An online second-hand shop built as the mini-project for academic project
+(ISET-Charguia, DSI 21, 2026-2027, supervised by Amel TRIKI).
 
-## Development server
+Visitors browse items without an account and can send price offers. A single administrator
+logs in to manage the items and decide on the offers received.
 
-To start a local development server, run:
+- **Live site:** [front-end URL]
+- **API:** [server URL]
+- **Author:** Rayen Hidri
+
+## Features
+
+### Front office (visitors)
+- Item list with name, photo, category, price and availability
+- Search by name and category (combinable or separate) and sorting (newest, price, name, deadline)
+- Item detail page with every field and a countdown to the offer deadline
+- Offer form with validation. Negotiable items accept offers below the price, fixed-price items only accept offers at or above it
+- Static "About" page
+
+### Back office (administrator)
+- Login and change password
+- Add, view, edit and delete items
+- Offers table per item: accept or reject. Accepting an offer refuses the others and marks the item as sold; the buyer's contact details are shown only for the accepted offer
+- Separate navigation menu for the admin area
+
+## Tech stack
+
+| Part | Technology |
+| --- | --- |
+| Front end | Angular 22 (signals, signal forms, nested routes), Tailwind CSS |
+| Back end | Node.js, Express, TypeScript |
+| Data | One JSON file (`server/data/db.json`), read and written with `fs` |
+
+Technical points covered: signals, signal forms with validation, TypeScript interfaces
+(`Article`, `Offre`, `Admin`), services, parent/child components (list and card),
+custom pipe (`countdown`) plus Angular's `number` pipe, `[class]` binding, separate routes for
+list and detail, nested routes (user layout and admin layout), different menus for visitor and
+admin.
+
+## Project structure
+
+```
+MiniProjet/
+  src/app/
+    components/
+      user/        user-layout, article-list, article-detail, about, login
+      admin/       admin-layout, article-list, article-form, article-edit, change-password
+      shared/      article-card, error (404 page)
+    models/        article, offre, admin
+    services/      article-services, admin-services
+    pipes/         countdown-pipe
+  server/
+    data/db.json
+    src/           app.ts, server.ts, Routes, Controllers, services, Models
+```
+
+## Running the project locally
+
+You need Node.js installed. Open two terminals.
+
+**1. Start the server** (port 3000):
 
 ```bash
+cd server
+npm install
+npm run dev
+```
+
+**2. Start the Angular app** (port 4200), from the project root:
+
+```bash
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4200/`.
 
-## Code scaffolding
+Admin login: hidri@example.com / rayen2005
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## API
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | `/articles?title=&category=` | List items, optionally filtered |
+| GET | `/articles/:id` | One item |
+| POST | `/articles` | Create an item |
+| PUT | `/articles/:id` | Update an item (its offers are kept) |
+| DELETE | `/articles/:id` | Delete an item |
+| POST | `/articles/:id/offers` | Add an offer |
+| PATCH | `/articles/:id/offers/:offerId` | Accept or refuse an offer |
+| POST | `/admins/login` | Admin login |
+| PATCH | `/admins/:id/password` | Change the admin password |
 
 ## Building
 
-To build the project run:
-
 ```bash
-ng build
+ng build              # Angular app
+cd server && npm run build   # server, compiled to server/dist
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Known limitations
 
-## Running unit tests
+This is a school project, so some things are deliberately simple:
+- The server has no token authentication. The admin pages are hidden in the Angular app, but the API routes are open
+- Passwords are stored as plain text in `db.json`
+- Data lives in a single JSON file. On a free host it can reset when the server restarts, so the committed `db.json` serves as the demo data
+- Offers can be sent without an account, so the form only validates its fields
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Author
 
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Rayen Hidri, DSI 21, ISET-Charguia, 2026-2027.

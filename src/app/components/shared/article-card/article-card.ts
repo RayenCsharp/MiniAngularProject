@@ -1,9 +1,10 @@
 import { Component, input } from '@angular/core';
 import { Article } from '../../../models/article';
 import { RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   selector: 'app-article-card',
   styleUrl: './article-card.css',
   templateUrl: './article-card.html',
