@@ -41,10 +41,10 @@ export class ArticleEdit implements OnInit {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     if (this.id != null) {
       const article = this.articleServices.getArticleById(this.id);
-      this.article.set(article);
       if (article == undefined) {
         console.error(this.id + " doesn't exist in the dataBase");
       } else {
+        this.article.set(article);
         this.articleModel.set(article);
         this.offers.set(article.offres);
         this.sortOffers(this.sortBy());
@@ -77,7 +77,7 @@ export class ArticleEdit implements OnInit {
     required(path.categorie, { message: 'Category is required' });
     required(path.etat, { message: 'State is required' });
     required(path.deadline, { message: 'Deadline is required' });
-    minDate(path.deadline, new Date(), { message: 'Deadline must be a future date' });
+    minDate(path.deadline, this.articleModel().datePublication, { message: 'Deadline cannot be before the publication date' });
     required(path.description, { message: 'Description is required' });
     minLength(path.description, 30, { message: 'Description must be at least 30 characters' });
     maxLength(path.description, 500, {
@@ -86,6 +86,8 @@ export class ArticleEdit implements OnInit {
   });
 
   startEdit() {
+    const current = this.article();
+    if (current) this.articleModel.set({ ...current });
     this.editing.set(true);
   }
 
@@ -97,7 +99,10 @@ export class ArticleEdit implements OnInit {
 
   onSubmit() {
     if (this.articleForm().invalid()) return;
-    if (this.articleServices.updateArticle(this.articleModel())) {
+    const current = this.article();
+    if (!current) return;
+    const toSave = { ...this.articleModel(), offres: current.offres };
+    if (this.articleServices.updateArticle(toSave)) {
       const updated = this.articleServices.getArticleById(this.articleModel().id);
       this.article.set(updated);
       this.offers.set(updated?.offres ?? []);

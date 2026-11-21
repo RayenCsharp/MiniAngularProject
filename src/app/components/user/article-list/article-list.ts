@@ -16,6 +16,10 @@ export class ArticleList {
   sort = signal('newest');
   articles = signal<Article[]>(this.articleServices.articles());
 
+  constructor() {
+    this.updateArticles();
+  }
+
   updateArticles() {
     const title = this.search().trim();
     const category = this.category();
@@ -24,8 +28,10 @@ export class ArticleList {
       : [...this.articleServices.articles()];
 
     if (category !== 'all') {
-      const categoryIds = this.articleServices.getArticlesByCategory(category).map((article) => article.id)
-      
+      const categoryIds = this.articleServices
+        .getArticlesByCategory(category)
+        .map((article) => article.id);
+
       filtered = filtered.filter((article) => categoryIds.includes(article.id));
     }
 
@@ -45,12 +51,10 @@ export class ArticleList {
 
   onSort(sortValue: string) {
     this.sort.set(sortValue);
-    const articles = this.articles();
+    const articles = [...this.articles()];
 
     if (sortValue === 'newest') {
-      articles.sort(
-        (a, b) => b.datePublication.getTime() - a.datePublication.getTime(),
-      );
+      articles.sort((a, b) => b.datePublication.getTime() - a.datePublication.getTime());
     } else if (sortValue === 'price-asc') {
       articles.sort((a, b) => a.prix - b.prix);
     } else if (sortValue === 'price-desc') {

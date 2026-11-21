@@ -16,6 +16,10 @@ export class ArticleList {
   sort = signal('newest');
   articles = signal<Article[]>(this.articleServices.articles());
 
+  constructor() {
+    this.updateArticles();
+  }
+
   updateArticles() {
     const title = this.search().trim();
     const category = this.category();
@@ -44,7 +48,7 @@ export class ArticleList {
 
   onSort(sortValue: string) {
     this.sort.set(sortValue);
-    const articles = this.articles();
+    const articles = [...this.articles()];
 
     if (sortValue === 'newest') {
       articles.sort(
