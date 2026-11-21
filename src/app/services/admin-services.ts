@@ -2,8 +2,9 @@ import { Service, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { Admin } from '../models/admin';
+import { environment } from '../../environments/environment';
 
-const AdminUrl = 'http://localhost:3000/admins';
+const AdminUrl = `${environment.apiUrl}/admins`;
 
 const ADMIN_KEY = 'currentAdmin';
 

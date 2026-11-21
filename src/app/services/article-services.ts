@@ -3,8 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, tap, map, catchError, of } from 'rxjs';
 import { Article } from '../models/article';
 import { Offre } from '../models/offre';
+import { environment } from '../../environments/environment';
 
-const ArticleUrl = 'http://localhost:3000/articles';
+
+const ArticleUrl = `${environment.apiUrl}/articles`;
 
 const jsonDateRevive = (a: Article): Article => ({
   ...a,
