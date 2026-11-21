@@ -36,20 +36,25 @@ export class ArticleEdit implements OnInit {
   infoDialogOpen = signal(false);
   selectedOffer = signal<Offre | undefined>(undefined);
 
+  private show(article: Article) {
+    this.article.set(article);
+    this.offers.set(article.offres);
+    this.sortOffers(this.sortBy());
+  }
+
   private id: string | null = null;
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    if (this.id != null) {
-      const article = this.articleServices.getArticleById(this.id);
+    if (this.id == null) return;
+
+    this.articleServices.getArticleById(this.id).subscribe((article) => {
       if (article == undefined) {
         console.error(this.id + " doesn't exist in the dataBase");
-      } else {
-        this.article.set(article);
-        this.articleModel.set(article);
-        this.offers.set(article.offres);
-        this.sortOffers(this.sortBy());
+        return;
       }
-    }
+      this.articleModel.set({ ...article });
+      this.show(article);
+    });
   }
 
   readonly articleModel = signal<Article>({
@@ -77,7 +82,9 @@ export class ArticleEdit implements OnInit {
     required(path.categorie, { message: 'Category is required' });
     required(path.etat, { message: 'State is required' });
     required(path.deadline, { message: 'Deadline is required' });
-    minDate(path.deadline, this.articleModel().datePublication, { message: 'Deadline cannot be before the publication date' });
+    minDate(path.deadline, () => this.article()?.datePublication ?? new Date(), {
+      message: 'Deadline cannot be before the publication date',
+    });
     required(path.description, { message: 'Description is required' });
     minLength(path.description, 30, { message: 'Description must be at least 30 characters' });
     maxLength(path.description, 500, {
@@ -93,7 +100,7 @@ export class ArticleEdit implements OnInit {
 
   cancelEdit() {
     const article = this.article();
-    if (article) this.articleModel.set(article);
+    if (article) this.articleModel.set({ ...article });
     this.editing.set(false);
   }
 
@@ -101,16 +108,17 @@ export class ArticleEdit implements OnInit {
     if (this.articleForm().invalid()) return;
     const current = this.article();
     if (!current) return;
+
     const toSave = { ...this.articleModel(), offres: current.offres };
-    if (this.articleServices.updateArticle(toSave)) {
-      const updated = this.articleServices.getArticleById(this.articleModel().id);
-      this.article.set(updated);
-      this.offers.set(updated?.offres ?? []);
-      this.sortOffers(this.sortBy());
-      this.editing.set(false);
-      this.successMessage.set('Article updated successfully.');
-      setTimeout(() => this.successMessage.set(''), 3000);
-    }
+    this.articleServices.updateArticle(toSave).subscribe({
+      next: (updated) => {
+        this.show(updated);
+        this.editing.set(false);
+        this.successMessage.set('Article updated successfully.');
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: () => console.error('Could not update the article'),
+    });
   }
 
   highestOfferId() {
@@ -124,23 +132,17 @@ export class ArticleEdit implements OnInit {
   acceptOffer(offerId: string) {
     const article = this.article();
     if (!article) return;
-    if (this.articleServices.updateOfferStatus(article.id, offerId, 'accepted')) {
-      const updated = this.articleServices.getArticleById(article.id);
-      this.article.set(updated);
-      this.offers.set(updated?.offres ?? []);
-      this.sortOffers(this.sortBy());
-    }
+    this.articleServices
+      .updateOfferStatus(article.id, offerId, 'accepted')
+      .subscribe((updated) => this.show(updated));
   }
 
   rejectOffer(offerId: string) {
     const article = this.article();
     if (!article) return;
-    if (this.articleServices.updateOfferStatus(article.id, offerId, 'refused')) {
-      const updated = this.articleServices.getArticleById(article.id);
-      this.article.set(updated);
-      this.offers.set(updated?.offres ?? []);
-      this.sortOffers(this.sortBy());
-    }
+    this.articleServices
+      .updateOfferStatus(article.id, offerId, 'refused')
+      .subscribe((updated) => this.show(updated));
   }
 
   sortOffers(sortBy: string) {
@@ -172,10 +174,10 @@ export class ArticleEdit implements OnInit {
   confirmDelete() {
     const article = this.article();
     if (!article) return;
-    if (this.articleServices.deleteArticle(article.id)) {
+    this.articleServices.deleteArticle(article.id).subscribe(() => {
       this.deleteDialogOpen.set(false);
       void this.router.navigate(['/admin/articles']);
-    }
+    });
   }
 
   openOfferInfo(offer: Offre) {

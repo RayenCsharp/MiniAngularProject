@@ -24,14 +24,17 @@ export class ArticleDetail implements OnInit {
   private id: string | null = null;
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    if (this.id != null) {
-      this.article.set(this.articleServices.getArticleById(this.id));
-      if (this.article() == undefined) {
+    if (this.id == null) return;
+
+    this.articleServices.getArticleById(this.id).subscribe((article) => {
+      this.article.set(article);
+      if (article == undefined) {
         console.error(this.id + " doesn't exist in the dataBase");
-      } else {
-        this.offers.set(this.article()?.offres);
+        return;
       }
-    }
+      this.offers.set(article.offres);
+      this.sortOffers(this.sortBy());
+    });
   }
 
   readonly offreModel = signal<Offre>({
@@ -61,6 +64,7 @@ export class ArticleDetail implements OnInit {
   });
 
   onSubmit() {
+    if (this.offreForm().invalid()) return;
     this.offerSuccess.set(false);
 
     const articleId = this.article()?.id;
@@ -69,24 +73,19 @@ export class ArticleDetail implements OnInit {
       return;
     }
 
-    console.log('Form submitted:', this.offreModel());
-    const offre = { ...this.offreModel(), date: new Date() }; // Update the date to the current date when submitting
-    const added = this.articleServices.addOfferToArticle(articleId, offre);
-    if (!added) {
-      console.error(`Cannot add offer: article ${articleId} does not exist`);
-      return;
-    }
+    const offre = { ...this.offreModel(), date: new Date() };
 
-    const updatedArticle = this.articleServices.getArticleById(articleId);
-    this.article.set(updatedArticle);
-    this.offers.set(updatedArticle?.offres ?? []);
-    this.sortOffers(this.sortBy());
-    this.resetForm();
-    this.offerSuccess.set(true);
-    setTimeout(() => {
-      this.offerSuccess.set(false);
-    }, 3000);
-    console.log('Offer added to article:', this.offers());
+    this.articleServices.addOfferToArticle(articleId, offre).subscribe({
+      next: (updatedArticle) => {
+        this.article.set(updatedArticle);
+        this.offers.set(updatedArticle.offres);
+        this.sortOffers(this.sortBy());
+        this.resetForm();
+        this.offerSuccess.set(true);
+        setTimeout(() => this.offerSuccess.set(false), 3000);
+      },
+      error: () => console.error(`Cannot add offer: article ${articleId} does not exist`),
+    });
   }
 
   resetForm() {

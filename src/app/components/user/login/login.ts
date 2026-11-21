@@ -26,23 +26,20 @@ export class Login {
   });
 
   onSubmit() {
+    if (this.loginForm().invalid()) return;
     this.errorDisplay.set(false);
-    console.log('Form submitted with values:', this.loginModel());
-    const exists = this.adminServices.verifyAdmin(
-      this.loginModel().email,
-      this.loginModel().password,
-    );
-    if (exists) {
-      console.log('Admin exists, navigating to admin dashboard...');
-      this.adminServices.setCurrentAdmin(exists);
-      this.router.navigate(['/admin']);
-    } else {
-      this.errorDisplay.set(true);
-      setTimeout(() => {
-        this.errorDisplay.set(false);
-      }, 3000);
-    }
-    this.resetForm();
+
+    const { email, password } = this.loginModel();
+
+    this.adminServices.verifyAdmin(email, password).subscribe((admin) => {
+      if (admin) {
+        this.router.navigate(['/admin']);
+      } else {
+        this.errorDisplay.set(true);
+        setTimeout(() => this.errorDisplay.set(false), 3000);
+      }
+      this.resetForm();
+    });
   }
 
   resetForm() {

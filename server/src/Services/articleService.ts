@@ -26,26 +26,28 @@ export const searchArticles = (title?: string, category?: string): Article[] => 
 
   return readDb().articles.filter(
     (a) =>
-      a.nom.toLowerCase().includes(t) &&
-      (!c || c === 'all' || a.categorie.toLowerCase() === c),
+      a.nom.toLowerCase().includes(t) && (!c || c === 'all' || a.categorie.toLowerCase() === c),
   );
 };
 
 export const addArticle = (data: Omit<Article, 'id'>): Article => {
   const db = readDb();
-  const newArticle: Article = { ...data, id: randomUUID() };
+  const newArticle: Article = { ...data, id: randomUUID(), offres: [] };
   db.articles.push(newArticle);
   writeDb(db);
   return newArticle;
 };
 
-export const updateArticle = (updatedArticle: Article): boolean => {
+export const updateArticle = (updatedArticle: Article): Article | undefined => {
   const db = readDb();
   const articleIndex = db.articles.findIndex((article) => article.id === updatedArticle.id);
-  if (articleIndex === -1) return false;
-  db.articles[articleIndex] = {...updatedArticle, offres: db.articles[articleIndex]?.offres || []};
+  if (articleIndex === -1) return undefined;
+  db.articles[articleIndex] = {
+    ...updatedArticle,
+    offres: db.articles[articleIndex]?.offres || [],
+  };
   writeDb(db);
-  return true;
+  return db.articles[articleIndex];
 };
 
 export const deleteArticle = (articleId: string): boolean => {
@@ -57,27 +59,30 @@ export const deleteArticle = (articleId: string): boolean => {
   return true;
 };
 
-export const addOfferToArticle = (articleId: string, offer: Omit<Offre, 'id'>): boolean => {
+export const addOfferToArticle = (
+  articleId: string,
+  offer: Omit<Offre, 'id'>,
+): Article | undefined => {
   const db = readDb();
   const updatedArticle = db.articles.find((article) => article.id === articleId);
-  if (!updatedArticle) return false;
+  if (!updatedArticle) return undefined;
   const newOffer: Offre = { ...offer, id: randomUUID() };
   updatedArticle.offres.push(newOffer);
   writeDb(db);
-  return true;
+  return updatedArticle;
 };
 
 export const updateOfferStatus = (
   articleId: string,
   offerId: string,
   status: Offre['status'],
-): boolean => {
+): Article | undefined => {
   const db = readDb();
   const article = db.articles.find((article) => article.id === articleId);
   const offer = article?.offres.find((offer) => offer.id === offerId);
-  if (!article || !offer) return false;
+  if (!article || !offer) return undefined;
   if (status === 'accepted') {
-    if (!article.disponible) return false;
+    if (!article.disponible) return undefined;
     article.offres.forEach((o) => {
       o.status = o.id === offerId ? 'accepted' : 'refused';
     });
@@ -86,5 +91,5 @@ export const updateOfferStatus = (
     offer.status = status;
   }
   writeDb(db);
-  return true;
+  return article;
 };

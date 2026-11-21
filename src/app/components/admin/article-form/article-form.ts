@@ -14,7 +14,7 @@ import {
 } from '@angular/forms/signals';
 
 @Component({
-  imports: [ FormField, FormRoot],
+  imports: [FormField, FormRoot],
   selector: 'app-article-form',
   styleUrl: './article-form.css',
   templateUrl: './article-form.html',
@@ -59,18 +59,16 @@ export class ArticleForm {
   onSubmit() {
     if (this.articleForm().invalid()) return;
 
-    console.log('Article submitted:', this.articleModel());
-    const success = this.articleServices.addArticle({
-      ...this.articleModel(),
-      datePublication: new Date(),
-    });
-    if (success) {
-      this.successMessage.set(true);
-      setTimeout(() => {
-        this.successMessage.set(false);
-      }, 3000);
-    }
-    this.resetForm();
+    this.articleServices
+      .addArticle({ ...this.articleModel(), datePublication: new Date() })
+      .subscribe({
+        next: () => {
+          this.successMessage.set(true);
+          setTimeout(() => this.successMessage.set(false), 3000);
+          this.resetForm();
+        },
+        error: () => console.error('Could not create the article'),
+      });
   }
 
   resetForm() {

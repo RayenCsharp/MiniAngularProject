@@ -28,17 +28,17 @@ export const create = (req: Request, res: Response) => {
     res.status(500).json({ message: 'Failed to create article' });
     return;
   }
-  res.status(201).json({ message: 'Article created successfully' , data: article});
+  res.status(201).json(article);
 };
 
 export const update = (req: Request, res: Response) => {
   const updatedArticle = req.body;
-  const success = articleService.updateArticle(updatedArticle);
-  if (!success) {
+  const article = articleService.updateArticle(updatedArticle);
+  if (!article) {
     res.status(404).json({ message: 'Article not found' });
     return;
   }
-  res.json({ message: 'Article updated successfully' });
+  res.json(article);
 }
 
 export const remove = (req: Request, res: Response) => {
@@ -48,28 +48,28 @@ export const remove = (req: Request, res: Response) => {
     res.status(404).json({ message: 'Article not found' });
     return;
   }
-  res.json({ message: 'Article deleted successfully' });
+  res.json().send();
 };
 
 export const addOffer = (req: Request, res: Response) => {
   const articleId = String(req.params.id);
   const offerData = req.body;
-  const success = articleService.addOfferToArticle(articleId, offerData);
-  if (!success) {
+  const article = articleService.addOfferToArticle(articleId, offerData);
+  if (!article) {
     res.status(404).json({ message: 'Article not found' });
     return;
   }
-  res.status(201).json({ message: 'Offer added successfully' });
+  res.status(201).json(article);
 };
 
 export const updateOffer = (req: Request, res: Response) => {
   const articleId = String(req.params.id);
   const offerId = String(req.params.offerId);
   const { status } = req.body;
-  const success = articleService.updateOfferStatus(articleId, offerId, status);
-  if (!success) {
+  const article = articleService.updateOfferStatus(articleId, offerId, status);
+  if (!article) {
     res.status(404).json({ message: 'Article or offer not found' });
     return;
   }
-  res.json({ message: 'Offer status updated successfully' });
+  res.json(article);
 }

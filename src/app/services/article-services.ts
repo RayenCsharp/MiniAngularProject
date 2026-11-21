@@ -1,202 +1,85 @@
-import { Service, signal } from '@angular/core';
+import { Service, signal, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, tap, map, catchError, of } from 'rxjs';
 import { Article } from '../models/article';
 import { Offre } from '../models/offre';
 
+const ArticleUrl = 'http://localhost:3000/articles';
+
+const jsonDateRevive = (a: Article): Article => ({
+  ...a,
+  datePublication: new Date(a.datePublication),
+  deadline: new Date(a.deadline),
+  offres: a.offres.map((o) => ({ ...o, date: new Date(o.date) })),
+});
+
 @Service()
 export class ArticleServices {
-  private _articles = signal<Article[]>([
-    {
-      id: '1',
-      nom: 'Vintage Leather Jacket',
-      photo:
-        'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80',
-      prix: 85,
-      categorie: 'Clothing',
-      description: 'Brown leather jacket, size M. A few small scratches on the sleeves.',
-      etat: 'good',
-      negociable: true,
-      disponible: true,
-      datePublication: new Date('2026-10-12'),
-      deadline: new Date('2026-11-30'),
-      offres: [
-        {
-          id: '101',
-          nomAcheteur: 'Rayen',
-          emailAcheteur: 'rayen@example.com',
-          telephoneAcheteur: '20000001',
-          montant: 70,
-          message: 'Can you do 70 TND?',
-          date: new Date('2026-10-14'),
-          status: 'waiting',
-        },
-        {
-          id: '102',
-          nomAcheteur: 'Sami Ben Ali',
-          emailAcheteur: 'sami.benali@example.com',
-          telephoneAcheteur: '22123456',
-          montant: 75,
-          message: 'Is the jacket still available? I can pick it up this weekend.',
-          date: new Date('2026-10-16'),
-          status: 'waiting',
-        },
-      ],
-    },
-    {
-      id: '2',
-      nom: 'Samsung Galaxy A12',
-      photo:
-        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80',
-      prix: 220,
-      categorie: 'Electronics',
-      description: '64 GB, cracked corner on the back, screen is perfect. Charger included.',
-      etat: 'used',
-      negociable: true,
-      disponible: true,
-      datePublication: new Date('2026-10-20'),
-      deadline: new Date('2026-12-05'),
-      offres: [],
-    },
-    {
-      id: '3',
-      nom: 'Wooden Bookshelf',
-      photo:
-        'https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=800&q=80',
-      prix: 120,
-      categorie: 'Furniture',
-      description: 'Five shelves, 180 cm tall. Solid wood, needs to be picked up in Tunis.',
-      etat: 'good',
-      negociable: false,
-      disponible: true,
-      datePublication: new Date('2026-10-25'),
-      deadline: new Date('2026-12-10'),
-      offres: [],
-    },
-    {
-      id: '4',
-      nom: 'Harry Potter Box Set',
-      photo:
-        'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=800&q=80',
-      prix: 60,
-      categorie: 'Books',
-      description: 'Books 1 to 7, English edition. Pages slightly yellowed.',
-      etat: 'good',
-      negociable: true,
-      disponible: false,
-      datePublication: new Date('2026-09-30'),
-      deadline: new Date('2026-10-31'),
-      offres: [],
-    },
-    {
-      id: '5',
-      nom: 'Photoshop Poster Templates',
-      photo:
-        'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=800&q=80',
-      prix: 15,
-      categorie: 'Digital',
-      description: 'Pack of 20 editable poster templates (PSD). Sent by email after purchase.',
-      etat: 'new',
-      negociable: false,
-      disponible: true,
-      datePublication: new Date('2026-11-01'),
-      deadline: new Date('2026-12-15'),
-      offres: [],
-    },
-    {
-      id: '6',
-      nom: 'Mountain Bike 26"',
-      photo:
-        'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80',
-      prix: 300,
-      categorie: 'Sports',
-      description: '21 speeds, new tires. The front brake needs adjusting.',
-      etat: 'used',
-      negociable: true,
-      disponible: true,
-      datePublication: new Date('2026-11-03'),
-      deadline: new Date('2026-12-20'),
-      offres: [],
-    },
-  ]);
+  private readonly _http = inject(HttpClient);
+  private _articles = signal<Article[]>([]);
   readonly articles = this._articles.asReadonly();
-  getArticleById(id: string): Article | undefined {
-    return this._articles().find((article) => article.id == id);
+
+  // replace one article inside the signal with the version the server returned
+  private replace(updated: Article) {
+    this._articles.update((list) => list.map((a) => (a.id === updated.id ? updated : a)));
   }
 
-  getArticlesByTitle(title: string): Article[] {
-    const lowerTitle = title.toLowerCase();
-    return this._articles().filter((article) => article.nom.toLowerCase().includes(lowerTitle));
+  getAllArticles(): Observable<Article[]> {
+    return this.searchArticles();
   }
 
-  getArticlesByCategory(category: string): Article[] {
-    const lowerCategory = category.toLowerCase();
-    return this._articles().filter((article) =>
-      article.categorie.toLowerCase().includes(lowerCategory),
+  searchArticles(title = '', category = 'all'): Observable<Article[]> {
+    const params = new HttpParams().set('title', title).set('category', category);
+    return this._http.get<Article[]>(ArticleUrl, { params }).pipe(
+      map((list) => list.map(jsonDateRevive)),
+      tap((list) => this._articles.set(list)),
     );
   }
 
-  addArticle(article: Article): boolean {
-    this._articles.update((articles) => [...articles, article]);
-    return true;
-  }
-
-  updateArticle(updatedArticle: Article): boolean {
-    const exists = this._articles().some((article) => article.id === updatedArticle.id);
-    if (!exists) return false;
-
-    this._articles.update((articles) =>
-      articles.map((article) => (article.id === updatedArticle.id ? updatedArticle : article)),
+  getArticleById(id: string): Observable<Article | undefined> {
+    return this._http.get<Article>(`${ArticleUrl}/${id}`).pipe(
+      map(jsonDateRevive),
+      catchError(() => of(undefined)), // a 404 becomes "no article", not an error
     );
-    return true;
   }
 
-  deleteArticle(articleId: string): boolean {
-    const exists = this._articles().some((article) => article.id === articleId);
-    if (!exists) return false;
-
-    this._articles.update((articles) => articles.filter((article) => article.id !== articleId));
-    return true;
-  }
-
-  updateOfferStatus(articleId: string, offerId: string, status: Offre['status']): boolean {
-    const article = this.getArticleById(articleId);
-    if (!article) return false;
-
-    this._articles.update((articles) =>
-      articles.map((currentArticle) =>
-        currentArticle.id === articleId
-          ? {
-              ...currentArticle,
-              disponible: status === 'accepted' ? false : currentArticle.disponible,
-              offres: currentArticle.offres.map((offer) =>
-                status === 'accepted'
-                  ? {
-                      ...offer,
-                      status: offer.id === offerId ? 'accepted' : 'refused',
-                    }
-                  : offer.id === offerId
-                    ? { ...offer, status: status }
-                    : offer,
-              ),
-            }
-          : currentArticle,
-      ),
+  addArticle(article: Article): Observable<Article> {
+    return this._http.post<Article>(ArticleUrl, article).pipe(
+      map(jsonDateRevive),
+      tap((created) => this._articles.update((list) => [...list, created])),
     );
-    return true;
   }
 
-  addOfferToArticle(articleId: string, offer: Offre): boolean {
-    const article = this.getArticleById(articleId);
-    if (article) {
-      this._articles.update((articles) =>
-        articles.map((a) => {
-          if (a.id === articleId) {
-            return { ...a, offres: [...a.offres, offer] };
-          }
-          return a;
-        }),
+  updateArticle(article: Article): Observable<Article> {
+    return this._http.put<Article>(`${ArticleUrl}/${article.id}`, article).pipe(
+      map(jsonDateRevive),
+      tap((updated) => this.replace(updated)),
+    );
+  }
+
+  deleteArticle(articleId: string): Observable<void> {
+    return this._http.delete<void>(`${ArticleUrl}/${articleId}`).pipe(
+      tap(() => this._articles.update((list) => list.filter((a) => a.id !== articleId))),
+    );
+  }
+
+  addOfferToArticle(articleId: string, offer: Omit<Offre, 'id'>): Observable<Article> {
+    return this._http.post<Article>(`${ArticleUrl}/${articleId}/offers`, offer).pipe(
+      map(jsonDateRevive),
+      tap((updated) => this.replace(updated)),
+    );
+  }
+
+  updateOfferStatus(
+    articleId: string,
+    offerId: string,
+    status: Offre['status'],
+  ): Observable<Article> {
+    return this._http
+      .patch<Article>(`${ArticleUrl}/${articleId}/offers/${offerId}`, { status })
+      .pipe(
+        map(jsonDateRevive),
+        tap((updated) => this.replace(updated)),
       );
-      return true;
-    }
-    return false;
   }
 }

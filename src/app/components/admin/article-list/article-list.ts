@@ -1,7 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { ArticleCard } from '../../shared/article-card/article-card';
 import { ArticleServices } from '../../../services/article-services';
-import { Article } from '../../../models/article';
 
 @Component({
   imports: [ArticleCard],
@@ -11,59 +10,48 @@ import { Article } from '../../../models/article';
 })
 export class ArticleList {
   private readonly articleServices = inject(ArticleServices);
+
   search = signal('');
   category = signal('all');
   sort = signal('newest');
-  articles = signal<Article[]>(this.articleServices.articles());
+
+  // the server does the filtering; the list only sorts what the service holds
+  articles = computed(() => {
+    const list = [...this.articleServices.articles()];
+
+    switch (this.sort()) {
+      case 'price-asc':
+        return list.sort((a, b) => a.prix - b.prix);
+      case 'price-desc':
+        return list.sort((a, b) => b.prix - a.prix);
+      case 'name':
+        return list.sort((a, b) => a.nom.localeCompare(b.nom));
+      case 'deadline':
+        return list.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
+      default:
+        return list.sort((a, b) => b.datePublication.getTime() - a.datePublication.getTime());
+    }
+  });
 
   constructor() {
-    this.updateArticles();
+    this.load();
   }
 
-  updateArticles() {
-    const title = this.search().trim();
-    const category = this.category();
-    let filtered = title
-      ? this.articleServices.getArticlesByTitle(title)
-      : [...this.articleServices.articles()];
-
-    if (category !== 'all') {
-      const categoryIds = this.articleServices.getArticlesByCategory(category).map((article) => article.id);
-      filtered = filtered.filter((article) => categoryIds.includes(article.id));
-    }
-
-    this.articles.set(filtered);
-    this.onSort(this.sort());
+  private load() {
+    this.articleServices.searchArticles(this.search().trim(), this.category()).subscribe();
   }
 
   onSearch(value: string) {
     this.search.set(value);
-    this.updateArticles();
+    this.load();
   }
 
   onCategoryChange(value: string) {
     this.category.set(value);
-    this.updateArticles();
+    this.load();
   }
 
-  onSort(sortValue: string) {
-    this.sort.set(sortValue);
-    const articles = [...this.articles()];
-
-    if (sortValue === 'newest') {
-      articles.sort(
-        (a, b) => b.datePublication.getTime() - a.datePublication.getTime(),
-      );
-    } else if (sortValue === 'price-asc') {
-      articles.sort((a, b) => a.prix - b.prix);
-    } else if (sortValue === 'price-desc') {
-      articles.sort((a, b) => b.prix - a.prix);
-    } else if (sortValue === 'name') {
-      articles.sort((a, b) => a.nom.localeCompare(b.nom));
-    } else if (sortValue === 'deadline') {
-      articles.sort((a, b) => a.deadline.getTime() - b.deadline.getTime());
-    }
-
-    this.articles.set([...articles]);
+  onSort(value: string) {
+    this.sort.set(value);
   }
 }

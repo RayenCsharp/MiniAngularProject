@@ -42,22 +42,18 @@ export class ChangePassword {
 
   onSubmit() {
     if (this.passwordForm().invalid()) return;
+    if (!this.currentAdmin) return;
 
-    if (this.currentAdmin) {
-      const success = this.adminServices.changePassword(
-        this.currentAdmin.id,
-        this.passwordModel().newPassword,
-      );
-
-      if (!success) {
-        this.errorServerMessage.set(true);
-        setTimeout(() => {
-          this.errorServerMessage.set(false);
-        }, 3000);
-      } else {
-        this.adminServices.setCurrentAdmin(null);
-        this.router.navigate(['/login']);
-      }
-    }
+    this.adminServices
+      .changePassword(this.currentAdmin.id, this.passwordModel().newPassword)
+      .subscribe((success) => {
+        if (success) {
+          this.adminServices.setCurrentAdmin(null);
+          this.router.navigate(['/login']);
+        } else {
+          this.errorServerMessage.set(true);
+          setTimeout(() => this.errorServerMessage.set(false), 3000);
+        }
+      });
   }
 }
